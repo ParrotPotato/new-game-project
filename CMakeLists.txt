@@ -9,6 +9,7 @@ find_package(OpenGL REQUIRED)
 add_executable(
     newgameproject
     src/main.cpp
+    src/core.cpp
 )
 
 target_include_directories(newgameproject   PUBLIC  ${SDL2_INCLUDE_DIRS})
