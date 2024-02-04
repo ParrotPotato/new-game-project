@@ -3,6 +3,8 @@
 
 #include <vector>
 
+using std::vector;
+
 namespace core{
 
     struct RecordedEvent{
