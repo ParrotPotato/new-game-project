@@ -15,7 +15,7 @@ We are using :
 - [x] Setting up basic platform layer which creates SDL window with opengl 
 - [x] setting up keyboard and mouse input handling 
 - [x] Setting up basic shader
-- [ ] Setting up basic vertex renderer 
+- [x] Setting up basic vertex renderer 
 - [ ] Setting up basic texture renderer
 - [ ] Setting up mesh loading (would be preferable to do with a library due to previous experience)
 - [ ] Settign up basic lighting

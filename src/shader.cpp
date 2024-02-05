@@ -69,6 +69,7 @@ namespace shader {
             }
             auto shader_source = opt_source.value();
 
+            printf("Compiling shader : %s\n", source_path.c_str());
             optional<ShaderUnit> opt_compiled_unit = create_and_compile_shader_unit(shader_source.c_str(), type);
             if(!opt_compiled_unit) {
                 cerr << "Failed to compile shader unit read from : " << source_path << endl;
