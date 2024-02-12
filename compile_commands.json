@@ -1,0 +1,22 @@
+[
+{
+  "directory": "/home/nitesh/work/projects/active/new-game-project/bin",
+  "command": "/usr/bin/c++   -I/usr/include/SDL2  -g   -std=c++2a -o CMakeFiles/newgameproject.dir/src/main.cpp.o -c /home/nitesh/work/projects/active/new-game-project/src/main.cpp",
+  "file": "/home/nitesh/work/projects/active/new-game-project/src/main.cpp"
+},
+{
+  "directory": "/home/nitesh/work/projects/active/new-game-project/bin",
+  "command": "/usr/bin/c++   -I/usr/include/SDL2  -g   -std=c++2a -o CMakeFiles/newgameproject.dir/src/core.cpp.o -c /home/nitesh/work/projects/active/new-game-project/src/core.cpp",
+  "file": "/home/nitesh/work/projects/active/new-game-project/src/core.cpp"
+},
+{
+  "directory": "/home/nitesh/work/projects/active/new-game-project/bin",
+  "command": "/usr/bin/c++   -I/usr/include/SDL2  -g   -std=c++2a -o CMakeFiles/newgameproject.dir/src/utils.cpp.o -c /home/nitesh/work/projects/active/new-game-project/src/utils.cpp",
+  "file": "/home/nitesh/work/projects/active/new-game-project/src/utils.cpp"
+},
+{
+  "directory": "/home/nitesh/work/projects/active/new-game-project/bin",
+  "command": "/usr/bin/c++   -I/usr/include/SDL2  -g   -std=c++2a -o CMakeFiles/newgameproject.dir/src/shader.cpp.o -c /home/nitesh/work/projects/active/new-game-project/src/shader.cpp",
+  "file": "/home/nitesh/work/projects/active/new-game-project/src/shader.cpp"
+}
+]

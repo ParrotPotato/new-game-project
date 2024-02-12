@@ -10,12 +10,18 @@ We are using :
 - **TBD** : mesh loading library (3rd party would be prefered)
 - **TBD** : audio library (3rd party would be prefered)
 
+#### Thoughts right now
+
+// 2024-02-07
+Current progress has made me extremely bored of what I am doing. Since I have an Idea in my head which I want to work on, I will leave the complicated model loading and texture loading and texture mapping for the time when I am willing to do something fun. In the mean time let's write a renderer which can render a cube easily on the screen.
+
 #### Progress 
 
 - [x] Setting up basic platform layer which creates SDL window with opengl 
 - [x] setting up keyboard and mouse input handling 
 - [x] Setting up basic shader
 - [x] Setting up basic vertex renderer 
+- [ ] Setting up a  cube generator so that we can have some cubes running around on the screen
 - [ ] Setting up basic texture renderer
 - [ ] Setting up mesh loading (would be preferable to do with a library due to previous experience)
 - [ ] Settign up basic lighting

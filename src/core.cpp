@@ -192,6 +192,7 @@ namespace core{
     // TODO(nitesh): This function is defined preemptively, we don't know if this
     // would be required or not TBH 
     std::vector<RecordedEvent> stream_window_events() {
-        return {};
+        std::vector<RecordedEvent> result;
+        return result;
     }
 }

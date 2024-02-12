@@ -1,27 +1,46 @@
-
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
 
+#include <glm/glm.hpp>
+
 #include "core.h"
+#include "utils.h"
 #include "shader.h"
 
 #include <cstdio>
-#include <cstdlib>
 
 #include <string>
 #include <vector>
 
 #include <optional>
-#include <utility>
 
 using std::string;
-using std::pair;
-using std::make_pair;
 using std::vector;
 
-namespace player{
+// NOTE(nitesh): Since this logic is going to be repeated
+GLuint basic_shader_program(){
+    std::string vertex_source = utils::load_file_buffer("resource/shader/simple_vert_shader.glsl").value();
+    GLuint vertex_shader = shader::compile_shader(vertex_source.c_str(), GL_VERTEX_SHADER);
+    if (!vertex_shader){
+        printf("failed to compile shader source : resource/shader/simple_vert_shader.glsl");
+        return 0;
+    }
+    std::string fragment_source= utils::load_file_buffer("resource/shader/simple_frag_shader.glsl").value();
+    GLuint fragment_shader = shader::compile_shader(fragment_source.c_str(), GL_FRAGMENT_SHADER);
+    if (!fragment_shader){
+        printf("failed to compile shader source : resource/shader/simple_frag_shader.glsl");
+        return 0;
+    }
+    GLuint shaders[] = {vertex_shader, fragment_shader};
+    GLuint program = shader::link_and_validate_program(shaders, 2);
+    if (!program) {
+        printf("failed to link and validate program source for basic_shader_program()");
+        return 0;
+    }
+    return program;
 }
 
+// NOTE(nitesh): Next task, setup program cameras which can move around the screen
 
 int main(){
 
@@ -29,14 +48,7 @@ int main(){
     
     core::create_window_instance("main_window", 400, 300);
 
-    std::pair<std::string, GLenum> vertex_shader_pair = make_pair(
-        std::string("resource/shader/simple_vert_shader.glsl"), GL_VERTEX_SHADER);
-    std::pair<std::string, GLenum> fragment_shader_pair = make_pair(
-        std::string("resource/shader/simple_frag_shader.glsl"), GL_FRAGMENT_SHADER);
-    
-
-    std::optional<shader::ShaderProgram> program = shader::create_shader_program(
-        vector<std::pair<std::string, GLenum>>{vertex_shader_pair, fragment_shader_pair});
+    GLuint program = basic_shader_program();
     
     // NOTE(nitesh): Vertices of a right triangle at 0.0
     std::vector<GLfloat> vertices = {
@@ -90,10 +102,9 @@ int main(){
     if (!program) {
         printf("error occurred while generating shader program");
     }
-
     if (program) {
-        glUseProgram(program.value().id);
-        printf("binding shader program with id: %d\n", program.value().id);
+        glUseProgram(program);
+        printf("binding shader program with id: %d\n", program);
     }
 
     while (core::window_close_requested() == false) {
@@ -110,7 +121,7 @@ int main(){
 
     if (program){
         glUseProgram(0);
-        printf("unbinding shader program with id: %d\n", program.value().id);
+        printf("unbinding shader program with id: %d\n", program);
     }
 
     printf("Exiting  ....\n");
