@@ -1,4 +1,4 @@
-#include "core.h"
+#include "core.hh"
 
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
@@ -42,6 +42,13 @@ namespace core{
     void create_window_instance(const char * window_name, int window_width, int window_height) {
         SDL_Init(SDL_INIT_EVERYTHING);
 
+        // NOTE(nitesh): Initializing opengl major and minor version for render doc debugging
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+
+        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
         SDL_Window * window_handle = SDL_CreateWindow(window_name, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height, SDL_WINDOW_OPENGL);
         if (window_handle == nullptr){
             printf("Error occurred while creating window handle");
@@ -61,6 +68,8 @@ namespace core{
 
         glClearColor(0.3f, 0.5f, 0.8f, 1.0f);
         glClearDepth(1.0f);
+
+        glEnable(GL_DEPTH_TEST);
 
         WindowState.window_handle = window_handle;
         WindowState.width = window_width;
