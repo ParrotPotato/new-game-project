@@ -193,7 +193,6 @@ int main(){
     core::create_window_instance("main_window", 800, 600);
 
     GLuint program = basic_shader_program();
-    
 
     if (!program) {
         printf("error occurred while generating shader program");
@@ -203,7 +202,7 @@ int main(){
         printf("binding shader program with id: %d\n", program);
     }
 
-    Camera main_camera = setup_camera(glm::vec3(5, 5, 5), glm::vec3(0.0, 0.0, 0.0));
+    Camera main_camera = setup_camera(glm::vec3(0, 5, 5), glm::vec3(0.0, 0.0, 0.0));
 
     glm::mat4 projection = setup_perspective_projection(45.0, 800, 600, 0.1, 1000.0f);
     glm::mat4 model = glm::mat4(1.0);
@@ -211,25 +210,34 @@ int main(){
 
 
     printf("Test loading model start ---\n");
-    Model new_model = load_entire_model("resource/models/kenney_mini-arena/Models/GLB format/banner.glb");
+    Model new_model = load_entire_model("resource/models/kenney_mini-arena/Models/GLB format/trophy.glb");
+
+    printf("-- Mesh info start --");
+    for(unsigned int i = 0 ; i < new_model.meshes.size() ; i++) {
+        printf("mesh index : %u\n",i);
+        printf("--   vertex offset : %u\n", new_model.meshes[i].vertex_offset);
+        printf("--   index offset  : %u\n", new_model.meshes[i].index_offset);
+        printf("--   index count   : %u\n", new_model.meshes[i].index_count);
+    }
+    printf("--  Mesh info end  --\n");
+
+
     printf("Test loading mode end ---\n");
 
-    printf("Test loading texture start ---\n");
+    // printf("Test loading texture start ---\n");
     Texture2D texture = load_texture_2d("resource/models/kenney_mini-arena/Models/GLB format/Textures/colormap.png", true);
-    printf("Texture id :  %u\n", texture.id);
-    printf("Test loading texture end ---\n");
+    // printf("Texture id :  %u\n", texture.id);
+    // printf("Test loading texture end ---\n");
 
 
-    printf(" -- vertex array  : %d\n", new_model.vao);
-    printf(" -- vertex buffer : %d\n", new_model.buf[B_VERT]);
-    printf(" -- tex buffer    : %d\n", new_model.buf[B_TEX]);
-    printf(" -- index buffer  : %d\n", new_model.buf[B_INDX]);
+    // printf(" -- vertex array  : %d\n", new_model.vao);
+    // printf(" -- vertex buffer : %d\n", new_model.buf[B_VERT]);
+    // printf(" -- tex buffer    : %d\n", new_model.buf[B_TEX]);
+    // printf(" -- index buffer  : %d\n", new_model.buf[B_INDX]);
 
-    /*
-    glm::mat4 projection = glm::mat4(1.0);
-    glm::mat4 model = glm::mat4(1.0);
-    glm::mat4 view = glm::mat4(1.0);
-    */
+    // glm::mat4 projection = glm::mat4(1.0);
+    // glm::mat4 model = glm::mat4(1.0);
+    // glm::mat4 view = glm::mat4(1.0);
 
     if (program) {
         glUseProgram(program);
@@ -239,12 +247,12 @@ int main(){
 
         auto texture0 = glGetUniformLocation(program, "colormap");
 
-        printf("projection Matrix Uniform : %d\n", projectionUniform);
-        printf("model Matrix Uniform      : %d\n", modelUniform);
-        printf("view Matrix Uniform       : %d\n", viewUniform);
-        printf("color map                 : %d\n", texture0);
+        // printf("projection Matrix Uniform : %d\n", projectionUniform);
+        // printf("model Matrix Uniform      : %d\n", modelUniform);
+        // printf("view Matrix Uniform       : %d\n", viewUniform);
+        // printf("color map                 : %d\n", texture0);
 
-        printf("Binding project matrix with value :\n%s\n", glm::to_string(projection).c_str());
+        // printf("Binding project matrix with value :\n%s\n", glm::to_string(projection).c_str());
 
         glUniformMatrix4fv(projectionUniform, 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(model));
@@ -263,11 +271,26 @@ int main(){
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture.id);
 
-
         glBindVertexArray(new_model.vao);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, new_model.buf[B_INDX]);
-        glDrawElements(GL_TRIANGLES, new_model.index_count, GL_UNSIGNED_INT, 0);
+
+        for(unsigned int i = 0; i < new_model.meshes.size() ; i++) {
+            MeshInfo mesh_info = new_model.meshes[i];
+            // glDrawElements(GL_TRIANGLES, new_model.index_count, GL_UNSIGNED_INT, 0);
+            glDrawElementsBaseVertex(
+                    GL_TRIANGLES, 
+                    mesh_info.index_count, 
+                    GL_UNSIGNED_INT, 
+                    (void *) (sizeof(unsigned int) * mesh_info.index_offset), 
+                    mesh_info.vertex_offset);
+        }
+
         glBindVertexArray(0);
+
+        // glBindVertexArray(new_model.vao);
+        // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, new_model.buf[B_INDX]);
+        // glDrawElements(GL_TRIANGLES, new_model.index_count, GL_UNSIGNED_INT, 0);
+        // glBindVertexArray(0);
 
         glUseProgram(0);
 
@@ -286,4 +309,5 @@ int main(){
     printf("Exiting  ....\n");
 
     return 0;
+
 }

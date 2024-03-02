@@ -24,12 +24,14 @@ Model load_entire_model(const char * file_source){
 
     printf("read mesh count : %d\n", model_scene->mNumMeshes);
 
-    unsigned int vertex_count = 0;
-    unsigned int tex_count    = 0;
-    unsigned int index_count  = 0;
+    unsigned int total_vertex_count = 0;
+    unsigned int total_tex_count    = 0;
+    unsigned int total_index_count  = 0;
+
+    std::vector<MeshInfo> meshes;
 
     for(unsigned int i = 0; i < model_scene->mNumMeshes; i++){
-        auto mesh = model_scene->mMeshes[i];
+        aiMesh * mesh = model_scene->mMeshes[i];
         printf("mesh [%u] vertex count : %u\n", i, mesh->mNumVertices);
         printf("material index: %u\n", mesh->mMaterialIndex);
 
@@ -42,22 +44,29 @@ Model load_entire_model(const char * file_source){
             printf("mesh has normals\n");
         }
 
-        vertex_count += mesh->mNumVertices * 3;
-        tex_count += mesh->mNumVertices *2;
-        index_count += mesh->mNumFaces  * 3;  // * 3 because we are using aiProcess_Triangulation
+        MeshInfo mesh_info;
+        mesh_info.vertex_offset = total_vertex_count;
+        mesh_info.index_offset  = total_index_count;
+        mesh_info.index_count   = mesh->mNumFaces * 3;
+
+        total_vertex_count += mesh->mNumVertices;
+        total_tex_count += mesh->mNumVertices;
+        total_index_count += mesh->mNumFaces  * 3;  // * 3 because we are using aiProcess_Triangulation
+
+        meshes.push_back(mesh_info);
     }
 
     {
-        printf("vertex count : %u\n", vertex_count);
-        printf("tex count    : %u\n", tex_count);
-        printf("index count  : %u\n", index_count);
+        printf("vertex count : %u\n", total_vertex_count);
+        printf("tex count    : %u\n", total_tex_count);
+        printf("index count  : %u\n", total_index_count);
     }
 
     // NOTE(nitesh): Allocating array size based on the num vertices and num faces
 
-    float * vertices = (float *) malloc(sizeof(float) * vertex_count);
-    unsigned int * indices  = (unsigned int *) malloc(sizeof(unsigned int) * index_count);
-    float * tex_coordinates = (float *) malloc(sizeof(float) * tex_count);
+    float * vertices = (float *) malloc(sizeof(float) * total_vertex_count * 3);
+    unsigned int * indices  = (unsigned int *) malloc(sizeof(unsigned int) * total_index_count);
+    float * tex_coordinates = (float *) malloc(sizeof(float) * total_tex_count * 2);
 
     unsigned int voffset = 0; 
     unsigned int ioffset = 0;
@@ -105,11 +114,11 @@ Model load_entire_model(const char * file_source){
     glGenBuffers(1, &ibo);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * vertex_count, (void *) vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * total_vertex_count * 3, (void *) vertices, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, tbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * tex_count, (void *) tex_coordinates, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * total_tex_count * 2, (void *) tex_coordinates, GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * index_count, (void *) indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * total_index_count, (void *) indices, GL_STATIC_DRAW);
 
     // Free up the allocated memory
     free(vertices);
@@ -135,7 +144,8 @@ Model load_entire_model(const char * file_source){
     result.buf[B_VERT] = vbo;
     result.buf[B_TEX]  = tbo;
     result.buf[B_INDX] = ibo;
-    result.index_count = index_count;
+    result.index_count = total_index_count;
+    result.meshes = meshes;
 
     return result;
 }
