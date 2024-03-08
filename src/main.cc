@@ -17,7 +17,6 @@
 #include <vector>
 
 using std::string;
-using std::vector;
 
 // NOTE(nitesh): add colors to the debug output for clarity and easy spotting failures
 
@@ -77,114 +76,6 @@ GLuint basic_shader_program(){
     return program;
 }
 
-GLuint * test_texture_rendering() {
-    std::vector<GLfloat> vertices = {
-        0.0, 0.0, 0.0,
-        1.0, 0.0, 0.0,
-        1.0, 1.0, 0.0,
-        0.0, 1.0, 0.0,
-    };
-
-    // NOTE(nitesh): Colors for the triangle
-    std::vector<GLfloat> tex =  {
-        0.0, 0.0,
-        1.0, 0.0,
-        1.0, 1.0,
-        0.0, 1.0,
-    };
-
-    std::vector<GLuint> indices = {
-        0, 1, 2,
-        0, 2, 3
-    };
-
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-
-    // buffer for vertices of the triangle
-    GLuint verticesVBO;
-    glGenBuffers(1, &verticesVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, verticesVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
-
-    // buffer for colors of the triangle
-    GLuint texVBO;
-    glGenBuffers(1, &texVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, texVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * tex.size(), tex.data(), GL_STATIC_DRAW);
-
-    GLuint indicesVBO ;
-    glGenBuffers(1, &indicesVBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesVBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indices.size(), indices.data(), GL_STATIC_DRAW);
-
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, verticesVBO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void *) 0);
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, texVBO);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void *) 0);
-    glEnableVertexAttribArray(1);
-
-    glBindVertexArray(0);
-
-    GLuint * result = (GLuint *) malloc(sizeof(GLuint) * 2);
-    result[0] = vao;
-    result[1] = indicesVBO;
-    return result;
-}
-
-void original_testing_code(){
-    // NOTE(nitesh): Vertices of a right triangle at 0.0
-    std::vector<GLfloat> vertices = {
-        0.0, 0.0, -500.0,
-        0.0, 50.0, -500.0,
-        50.0, 0.0, -500.0,
-    };
-
-    // NOTE(nitesh): Colors for the triangle
-    std::vector<GLfloat> colors =  {
-        0.0, 0.0, 0.0, 
-        1.0, 0.0, 0.0,
-        0.0, 1.0, 0.0,
-    };
-
-    // NOTE(nitesh): Index for triangle rendering
-    std::vector<GLuint> indices = {
-        0, 1, 2
-    };
-    
-    //vao 
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-
-    // buffer for vertices of the triangle
-    GLuint verticesVBO;
-    glGenBuffers(1, &verticesVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, verticesVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
-
-    // buffer for colors of the triangle
-    GLuint colorsVBO;
-    glGenBuffers(1, &colorsVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, colorsVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * colors.size(), colors.data(), GL_STATIC_DRAW);
-
-    GLuint indicesVBO ;
-    glGenBuffers(1, &indicesVBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesVBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indices.size(), indices.data(), GL_STATIC_DRAW);
-
-    // setting up vertex attrib object for rendering
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, verticesVBO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void *) 0);
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, colorsVBO);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void *) 0);
-    glEnableVertexAttribArray(1);
-}
-
 // NOTE(nitesh): Next task, setup program cameras which can move around the screen
 int main(){
 
@@ -210,7 +101,9 @@ int main(){
 
 
     printf("Test loading model start ---\n");
-    Model new_model = load_entire_model("resource/models/kenney_mini-arena/Models/GLB format/trophy.glb");
+    TextureResourceHandler rh = {};
+
+    Model new_model = load_entire_model("resource/models/kenney_mini-arena/Models/GLB format/trophy.glb", &rh);
 
     printf("-- Mesh info start --");
     for(unsigned int i = 0 ; i < new_model.meshes.size() ; i++) {
@@ -221,23 +114,9 @@ int main(){
     }
     printf("--  Mesh info end  --\n");
 
-
     printf("Test loading mode end ---\n");
 
-    // printf("Test loading texture start ---\n");
-    Texture2D texture = load_texture_2d("resource/models/kenney_mini-arena/Models/GLB format/Textures/colormap.png", true);
-    // printf("Texture id :  %u\n", texture.id);
-    // printf("Test loading texture end ---\n");
-
-
-    // printf(" -- vertex array  : %d\n", new_model.vao);
-    // printf(" -- vertex buffer : %d\n", new_model.buf[B_VERT]);
-    // printf(" -- tex buffer    : %d\n", new_model.buf[B_TEX]);
-    // printf(" -- index buffer  : %d\n", new_model.buf[B_INDX]);
-
-    // glm::mat4 projection = glm::mat4(1.0);
-    // glm::mat4 model = glm::mat4(1.0);
-    // glm::mat4 view = glm::mat4(1.0);
+    // Texture2D texture = texture_resource_load_and_cache_texture_2d( &rh, "resource/models/kenney_mini-arena/Models/GLB format/Textures/colormap.png", true);
 
     if (program) {
         glUseProgram(program);
@@ -267,16 +146,13 @@ int main(){
 
         glUseProgram(program);
 
-        // bind the correct texture
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture.id);
-
         glBindVertexArray(new_model.vao);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, new_model.buf[B_INDX]);
 
         for(unsigned int i = 0; i < new_model.meshes.size() ; i++) {
             MeshInfo mesh_info = new_model.meshes[i];
-            // glDrawElements(GL_TRIANGLES, new_model.index_count, GL_UNSIGNED_INT, 0);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, new_model.textures[mesh_info.texture_index].id);
             glDrawElementsBaseVertex(
                     GL_TRIANGLES, 
                     mesh_info.index_count, 
@@ -286,12 +162,6 @@ int main(){
         }
 
         glBindVertexArray(0);
-
-        // glBindVertexArray(new_model.vao);
-        // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, new_model.buf[B_INDX]);
-        // glDrawElements(GL_TRIANGLES, new_model.index_count, GL_UNSIGNED_INT, 0);
-        // glBindVertexArray(0);
-
         glUseProgram(0);
 
         if(core::key_down(SDLK_ESCAPE)) {

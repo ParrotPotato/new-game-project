@@ -9,8 +9,9 @@
 // NOTE(nitesh): Today we are going to work on model load and rendering aspect of our code
 //
 // 1. We might have to flip the uv coordinate system multiple times to get the right output
+// 2. Not using normal values for the time being
 
-Model load_entire_model(const char * file_source){
+Model load_entire_model(const char * file_source, TextureResourceHandler * rh){
     Assimp::Importer importer;
     const aiScene * model_scene = importer.ReadFile(file_source, aiProcess_Triangulate);
     if (model_scene == nullptr) {
@@ -28,7 +29,45 @@ Model load_entire_model(const char * file_source){
     unsigned int total_tex_count    = 0;
     unsigned int total_index_count  = 0;
 
+    std::vector<Texture2D> textures;
     std::vector<MeshInfo> meshes;
+
+    { // scope for loading all the textures, can be made a function if we are using this again
+        std::string::size_type name_offset = std::string(file_source).find_last_of("/");
+        std::string dir; 
+        if (name_offset == std::string::npos) {
+            dir = ".";
+        } else if (name_offset == 0) {
+            dir = "/";
+        } else {
+            dir = std::string(file_source).substr(0, name_offset);
+        }
+
+        for(unsigned int i = 0 ; i < model_scene->mNumMaterials ; i++){
+            const aiMaterial * material = model_scene->mMaterials[i];
+
+            if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0){
+                aiString texture_path;
+                if (material->GetTexture(aiTextureType_DIFFUSE, 0, &texture_path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS){
+                    std::string p(texture_path.data);
+
+                    if (p.substr(0, 2) == ".\\") {
+                        p = p.substr(2, p.size() - 2);
+                    }
+                    std::string full_path = dir + "/" + p;
+                    // NOTE(nitesh): Check if we need to change the texture loading or can we just leave this true 
+                    // here
+                    Texture2D texture = texture_resource_load_and_cache_texture_2d(rh, full_path.c_str(), true);
+
+                    if (texture.id == 0){
+                        printf("failed to load texture for model: %s\n -- texture file path : %s\n", file_source, full_path.c_str());
+                    }
+                    textures.push_back(texture);
+                }
+            }
+        }
+    }
+
 
     for(unsigned int i = 0; i < model_scene->mNumMeshes; i++){
         aiMesh * mesh = model_scene->mMeshes[i];
@@ -48,6 +87,7 @@ Model load_entire_model(const char * file_source){
         mesh_info.vertex_offset = total_vertex_count;
         mesh_info.index_offset  = total_index_count;
         mesh_info.index_count   = mesh->mNumFaces * 3;
+        mesh_info.texture_index = mesh->mMaterialIndex;
 
         total_vertex_count += mesh->mNumVertices;
         total_tex_count += mesh->mNumVertices;
@@ -55,13 +95,7 @@ Model load_entire_model(const char * file_source){
 
         meshes.push_back(mesh_info);
     }
-
-    {
-        printf("vertex count : %u\n", total_vertex_count);
-        printf("tex count    : %u\n", total_tex_count);
-        printf("index count  : %u\n", total_index_count);
-    }
-
+    
     // NOTE(nitesh): Allocating array size based on the num vertices and num faces
 
     float * vertices = (float *) malloc(sizeof(float) * total_vertex_count * 3);
@@ -146,6 +180,7 @@ Model load_entire_model(const char * file_source){
     result.buf[B_INDX] = ibo;
     result.index_count = total_index_count;
     result.meshes = meshes;
+    result.textures = textures;
 
     return result;
 }
