@@ -50,7 +50,6 @@ glm::mat4 setup_perspective_projection(float fov, float width, float height, flo
     return result;
 }
 
-
 // NOTE(nitesh): Since this logic is going to be repeated
 GLuint basic_shader_program(){
     //std::string vertex_source = read_and_load_file_in_buffer("resource/shader/simple_vert_shader.glsl");
@@ -93,7 +92,7 @@ int main(){
         printf("binding shader program with id: %d\n", program);
     }
 
-    Camera main_camera = setup_camera(glm::vec3(5, 5, 5), glm::vec3(0.0, 0.0, 0.0));
+    Camera main_camera = setup_camera(glm::vec3(0, 5, 5), glm::vec3(0.0, 0.0, 0.0));
 
     glm::mat4 projection = setup_perspective_projection(45.0, 800, 600, 0.1, 1000.0f);
     glm::mat4 model = glm::mat4(1.0);
@@ -103,8 +102,7 @@ int main(){
     printf("Test loading model start ---\n");
     TextureResourceHandler rh = {};
 
-    Model new_model = load_entire_model("resource/models/kenney_mini-arena/Models/GLB format/tree.glb", &rh);
-    Model second_model = load_entire_model("resource/models/kenney_mini-arena/Models/GLB format/floor-detail.glb", &rh);
+    Model new_model = load_entire_model("resource/models/kenney_mini-arena/Models/GLB format/character-soldier.glb", &rh);
 
     printf("-- Mesh info start --");
     for(unsigned int i = 0 ; i < new_model.meshes.size() ; i++) {
@@ -117,23 +115,13 @@ int main(){
 
     printf("Test loading mode end ---\n");
 
-    // Texture2D texture = texture_resource_load_and_cache_texture_2d( &rh, "resource/models/kenney_mini-arena/Models/GLB format/Textures/colormap.png", true);
-
+    // NOTE(nitesh): setting up shader uniforms which will be used for rendering
     if (program) {
         glUseProgram(program);
         auto projectionUniform = glGetUniformLocation(program, "projection");
         auto modelUniform = glGetUniformLocation(program, "model");
         auto viewUniform = glGetUniformLocation(program, "view");
-
         auto texture0 = glGetUniformLocation(program, "colormap");
-
-        // printf("projection Matrix Uniform : %d\n", projectionUniform);
-        // printf("model Matrix Uniform      : %d\n", modelUniform);
-        // printf("view Matrix Uniform       : %d\n", viewUniform);
-        // printf("color map                 : %d\n", texture0);
-
-        // printf("Binding project matrix with value :\n%s\n", glm::to_string(projection).c_str());
-
         glUniformMatrix4fv(projectionUniform, 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(modelUniform, 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(viewUniform, 1, GL_FALSE, glm::value_ptr(view));
@@ -141,49 +129,38 @@ int main(){
         glUseProgram(0);
     } 
 
+    unsigned long mesh_model_index = 0;
+    bool fullmodel = true;
     while (core::window_close_requested() == false) {
         core::clear_window();
         core::process_input();
 
         glUseProgram(program);
 
-        glBindVertexArray(new_model.vao);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, new_model.buf[B_INDX]);
-
-        for(unsigned int i = 0; i < new_model.meshes.size() ; i++) {
-            MeshInfo mesh_info = new_model.meshes[i];
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, new_model.textures[mesh_info.texture_index].id);
-            glDrawElementsBaseVertex(
-                    GL_TRIANGLES, 
-                    mesh_info.index_count, 
-                    GL_UNSIGNED_INT, 
-                    (void *) (sizeof(unsigned int) * mesh_info.index_offset), 
-                    mesh_info.vertex_offset);
+        if (fullmodel) { 
+            render_entire_model(new_model);
+        } else {
+            render_single_mesh_of_model(new_model, mesh_model_index);
         }
 
-        glBindVertexArray(second_model.vao);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, second_model.buf[B_INDX]);
-
-        for(unsigned int i = 0 ; i < second_model.meshes.size() ; i++){
-            MeshInfo mesh_info = second_model.meshes[i];
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, second_model.textures[mesh_info.texture_index].id);
-            glDrawElementsBaseVertex(
-                    GL_TRIANGLES, 
-                    mesh_info.index_count, 
-                    GL_UNSIGNED_INT, 
-                    (void *) (sizeof(unsigned int) * mesh_info.index_offset), 
-                    mesh_info.vertex_offset);
-        }
-
-        glBindVertexArray(0);
         glUseProgram(0);
-
+        
         if(core::key_down(SDLK_ESCAPE)) {
             break;
         }
-        
+        if(core::key_pressed(SDLK_f)){
+            fullmodel = !fullmodel;
+            if (fullmodel) {
+                printf("Switched to full model rendering\n");
+            } else {
+                printf("Switched to parrt based rendering\n");
+            }
+        }
+        if(core::key_pressed(SDLK_SPACE)){ 
+            mesh_model_index = (mesh_model_index + 1) % new_model.meshes.size();
+            printf("rendering model part :  %s\n", new_model.meshes[mesh_model_index].name.c_str());
+        }         
+
         core::update_window();
     }
 

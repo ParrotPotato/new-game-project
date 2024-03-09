@@ -87,6 +87,7 @@ Model load_entire_model(const char * file_source, TextureResourceHandler * rh){
         mesh_info.index_offset  = total_index_count;
         mesh_info.index_count   = mesh->mNumFaces * 3;
         mesh_info.texture_index = mesh->mMaterialIndex;
+        mesh_info.name          = std::string(mesh->mName.data);
 
         total_vertex_count += mesh->mNumVertices;
         total_tex_count += mesh->mNumVertices;
@@ -185,3 +186,40 @@ Model load_entire_model(const char * file_source, TextureResourceHandler * rh){
 }
 
 
+
+// NOTE(nitesh): please update both these functions when rendering logic changes
+// 1. render entire model 
+// 2. render single mesh of model 
+
+void render_entire_model(const Model &model){
+    glBindVertexArray(model.vao);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model.buf[B_INDX]);
+    for(unsigned int i = 0; i < model.meshes.size() ; i++) {
+        MeshInfo mesh_info = model.meshes[i];
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, model.textures[mesh_info.texture_index].id);
+        glDrawElementsBaseVertex(
+                GL_TRIANGLES, 
+                mesh_info.index_count, 
+                GL_UNSIGNED_INT, 
+                (void *) (sizeof(unsigned int) * mesh_info.index_offset), 
+                mesh_info.vertex_offset);
+    }
+}
+void render_single_mesh_of_model(const Model & model, unsigned long index){
+    glBindVertexArray(model.vao);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model.buf[B_INDX]);
+    if ( index < model.meshes.size()) {
+        MeshInfo mesh_info = model.meshes[index];
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, model.textures[mesh_info.texture_index].id);
+        glDrawElementsBaseVertex(
+                GL_TRIANGLES, 
+                mesh_info.index_count, 
+                GL_UNSIGNED_INT, 
+                (void *) (sizeof(unsigned int) * mesh_info.index_offset), 
+                mesh_info.vertex_offset);
+    } else {
+        printf("- mesh at index %lu does not exist\n- model has %lu meshes", index, model.meshes.size());
+    }
+}

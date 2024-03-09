@@ -14,6 +14,7 @@ enum Buffers{
 };
 
 struct MeshInfo {
+    std::string name;
     unsigned int vertex_offset;
     unsigned int index_offset;
     unsigned int index_count;
@@ -30,5 +31,7 @@ struct Model {
 };
 
 Model load_entire_model(const char * file_source, TextureResourceHandler * rh);
+void render_entire_model(const Model &model);
+void render_single_mesh_of_model(const Model & model, unsigned long index);
 
 #endif
