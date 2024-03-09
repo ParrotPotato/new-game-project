@@ -6,8 +6,8 @@ We are using :
 
 - **SDL2** : For window context handling
 - **glew** : For openGL context handling and loading all openGL function pointers.
+- **Assimp** : mesh loading library (3rd party would be prefered)
 - **TBD** : physics engine (3rd party would be prefered)
-- **TBD** : mesh loading library (3rd party would be prefered)
 - **TBD** : audio library (3rd party would be prefered)
 
 #### Thoughts right now
@@ -23,6 +23,12 @@ Current progress has made me extremely bored of what I am doing. Since I have an
 
 #### Progress 
 
+Rendering is done in the game: 
+
+![current state screenshot](./screenshots/current_progress.png)
+
+##### Development
+
 - [x] Setting up basic platform layer which creates SDL window with opengl 
 - [x] setting up keyboard and mouse input handling 
 - [x] Setting up basic shader
@@ -33,8 +39,14 @@ Current progress has made me extremely bored of what I am doing. Since I have an
 - [x] Setting up basic texture renderer
 - [x] Setting up basic mesh loading (would be preferable to do with a library due to previous experience)
 - [x] Loading multi-part mesh models from assimp
-- [ ] Loading mesh related information from model file instead of hard-loading it directly
+- [x] Loading mesh related information from model file instead of hard-loading it directly
 - [ ] Setting up Animation loading and rendering ????????? 
 - [ ] Settign up basic lighting
-- [ ] Updating this list when above tasks are complete
-- [ ] Setting up a  cube generator so that we can have some cubes running around on the screen
+- [ ] Setting up a scene where multiple entities are present 
+
+##### Maintainance
+
+
+- [ ] Clean up project / view / model matrix code
+- [ ] Refactor memory allocation during memory loading
+

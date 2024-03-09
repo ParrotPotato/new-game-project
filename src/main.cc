@@ -93,7 +93,7 @@ int main(){
         printf("binding shader program with id: %d\n", program);
     }
 
-    Camera main_camera = setup_camera(glm::vec3(0, 5, 5), glm::vec3(0.0, 0.0, 0.0));
+    Camera main_camera = setup_camera(glm::vec3(5, 5, 5), glm::vec3(0.0, 0.0, 0.0));
 
     glm::mat4 projection = setup_perspective_projection(45.0, 800, 600, 0.1, 1000.0f);
     glm::mat4 model = glm::mat4(1.0);
@@ -103,7 +103,8 @@ int main(){
     printf("Test loading model start ---\n");
     TextureResourceHandler rh = {};
 
-    Model new_model = load_entire_model("resource/models/kenney_mini-arena/Models/GLB format/trophy.glb", &rh);
+    Model new_model = load_entire_model("resource/models/kenney_mini-arena/Models/GLB format/tree.glb", &rh);
+    Model second_model = load_entire_model("resource/models/kenney_mini-arena/Models/GLB format/floor-detail.glb", &rh);
 
     printf("-- Mesh info start --");
     for(unsigned int i = 0 ; i < new_model.meshes.size() ; i++) {
@@ -153,6 +154,21 @@ int main(){
             MeshInfo mesh_info = new_model.meshes[i];
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, new_model.textures[mesh_info.texture_index].id);
+            glDrawElementsBaseVertex(
+                    GL_TRIANGLES, 
+                    mesh_info.index_count, 
+                    GL_UNSIGNED_INT, 
+                    (void *) (sizeof(unsigned int) * mesh_info.index_offset), 
+                    mesh_info.vertex_offset);
+        }
+
+        glBindVertexArray(second_model.vao);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, second_model.buf[B_INDX]);
+
+        for(unsigned int i = 0 ; i < second_model.meshes.size() ; i++){
+            MeshInfo mesh_info = second_model.meshes[i];
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, second_model.textures[mesh_info.texture_index].id);
             glDrawElementsBaseVertex(
                     GL_TRIANGLES, 
                     mesh_info.index_count, 

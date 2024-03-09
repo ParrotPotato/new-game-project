@@ -68,7 +68,6 @@ Model load_entire_model(const char * file_source, TextureResourceHandler * rh){
         }
     }
 
-
     for(unsigned int i = 0; i < model_scene->mNumMeshes; i++){
         aiMesh * mesh = model_scene->mMeshes[i];
         printf("mesh [%u] vertex count : %u\n", i, mesh->mNumVertices);
