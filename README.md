@@ -12,6 +12,9 @@ We are using :
 
 #### Thoughts right now
 
+// 2024--3-8
+Added multipart texture rendering for 
+
 // 2024-03-02
 Added multi part mesh loading (NOTE: Please confirm if there are animations involed with the character-soldier model).
 
@@ -46,7 +49,7 @@ Rendering is done in the game:
 
 ##### Maintainance
 
-
+- [x] Bug detected in keyboard press tracking system
 - [ ] Clean up project / view / model matrix code
 - [ ] Refactor memory allocation during memory loading
 
