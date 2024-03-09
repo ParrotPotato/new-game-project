@@ -94,13 +94,11 @@ namespace core{
         // Resetting keyboard state
         for(unsigned int i = 0; i < PHYSICALKEYCOUNT + FUNCTIONALKEYCOUNT ; i++){
             KeyboardState.prev[i] = KeyboardState.curr[i];
-            KeyboardState.curr[i] = false;
         }
 
         // Resetting mouse state
         for(unsigned int i = 0; i < PHYSICALBUTTONCOUNT + FUNCTIONALBUTTONCOUNT ; i++){
-            MouseState.prev[i] = KeyboardState.curr[i];
-            MouseState.curr[i] = false;
+            MouseState.prev[i] = MouseState.curr[i];
         }
 
         MouseState.relx = 0.0;
