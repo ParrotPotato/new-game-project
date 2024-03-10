@@ -26,6 +26,7 @@ Model load_entire_model(const char * file_source, TextureResourceHandler * rh){
     printf("read mesh count : %d\n", model_scene->mNumMeshes);
 
     unsigned int total_vertex_count = 0;
+    unsigned int total_normal_count = 0;
     unsigned int total_tex_count    = 0;
     unsigned int total_index_count  = 0;
 
@@ -90,8 +91,9 @@ Model load_entire_model(const char * file_source, TextureResourceHandler * rh){
         mesh_info.name          = std::string(mesh->mName.data);
 
         total_vertex_count += mesh->mNumVertices;
-        total_tex_count += mesh->mNumVertices;
-        total_index_count += mesh->mNumFaces  * 3;  // * 3 because we are using aiProcess_Triangulation
+        total_normal_count += mesh->mNumVertices;
+        total_tex_count    += mesh->mNumVertices;
+        total_index_count  += mesh->mNumFaces  * 3;  // * 3 because we are using aiProcess_Triangulation
 
         meshes.push_back(mesh_info);
     }
@@ -99,10 +101,12 @@ Model load_entire_model(const char * file_source, TextureResourceHandler * rh){
     // NOTE(nitesh): Allocating array size based on the num vertices and num faces
 
     float * vertices = (float *) malloc(sizeof(float) * total_vertex_count * 3);
+    float * normals  = (float *) malloc(sizeof(float) * total_normal_count * 3);
     unsigned int * indices  = (unsigned int *) malloc(sizeof(unsigned int) * total_index_count);
     float * tex_coordinates = (float *) malloc(sizeof(float) * total_tex_count * 2);
 
     unsigned int voffset = 0; 
+    unsigned int noffset = 0;
     unsigned int ioffset = 0;
     unsigned int toffset = 0;
     for(unsigned int i = 0 ; i < model_scene->mNumMeshes; i++){
@@ -114,6 +118,15 @@ Model load_entire_model(const char * file_source, TextureResourceHandler * rh){
             
             voffset += 3;
         }
+
+        for(unsigned int ni = 0 ; ni < mesh->mNumVertices ; ni++){
+            normals[noffset + 0] = mesh->mNormals[ni].x;
+            normals[noffset + 1] = mesh->mNormals[ni].y;
+            normals[noffset + 2] = mesh->mNormals[ni].z;
+            
+            noffset += 3;
+        }
+
         // NOTE(nitesh): as per the spec if HasTexCoords is true then
         // the number of texture coordinates are equal as vertices
         for(unsigned int ti = 0 ; ti < mesh->mNumVertices ; ti++){
@@ -142,13 +155,16 @@ Model load_entire_model(const char * file_source, TextureResourceHandler * rh){
     GLuint vao;
     glGenVertexArrays(1 ,&vao);
 
-    GLuint vbo, ibo, tbo;
+    GLuint vbo, nbo, ibo, tbo;
     glGenBuffers(1, &vbo);
+    glGenBuffers(1, &nbo);
     glGenBuffers(1, &tbo);
     glGenBuffers(1, &ibo);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * total_vertex_count * 3, (void *) vertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, nbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * total_normal_count * 3, (void *) normals, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, tbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * total_tex_count * 2, (void *) tex_coordinates, GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
@@ -156,6 +172,7 @@ Model load_entire_model(const char * file_source, TextureResourceHandler * rh){
 
     // Free up the allocated memory
     free(vertices);
+    free(normals);
     free(indices);
     free(tex_coordinates);
 
@@ -167,9 +184,13 @@ Model load_entire_model(const char * file_source, TextureResourceHandler * rh){
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void *) 0);
     glEnableVertexAttribArray(0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, tbo);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void *) 0);
+    glBindBuffer(GL_ARRAY_BUFFER, nbo);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void *) 0);
     glEnableVertexAttribArray(1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, tbo);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void *) 0);
+    glEnableVertexAttribArray(2);
 
     glBindVertexArray(0);
 
