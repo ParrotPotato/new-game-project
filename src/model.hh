@@ -8,6 +8,7 @@
 
 enum Buffers{
     B_VERT,
+    B_NORM,
     B_TEX,
     B_INDX,
     B_COUNT

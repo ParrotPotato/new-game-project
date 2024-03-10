@@ -197,6 +197,7 @@ Model load_entire_model(const char * file_source, TextureResourceHandler * rh){
     Model result = {};
     result.vao = vao;
     result.buf[B_VERT] = vbo;
+    result.buf[B_NORM] = nbo;
     result.buf[B_TEX]  = tbo;
     result.buf[B_INDX] = ibo;
     result.index_count = total_index_count;
